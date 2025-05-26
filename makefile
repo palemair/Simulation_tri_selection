@@ -3,29 +3,25 @@ CFLAGS=-g -Wall -Wextra -pedantic -std=c11 -fno-common -fno-builtin
 LDFLAGS = -lSDL2
 EXEC= selection
 TESTS= test
+OBJ= obj
+LIB= lib/
+INC= include/
 
 all: $(EXEC)
 
-test : test-01.o sort.o
-	$(CC) -o $@ $^
-
-test-01.o : tests/test-01.c
-	$(CC) -o $@ -c $<
-
-sort.o : src/sort.c
-	$(CC) -c $< -c $<
-
-colors.o : src/colors.c
-	$(CC) -c $< -c $<
-
-selection : main.o sort.o colors.o
+selection : $(OBJ)/main.o $(OBJ)/sort.o $(OBJ)/colors.o
 	$(CC) -o $@ $^ $(LDFLAGS)
 
-%.o: src/%.c
-	$(CC) -c $^ $(CFLAGS)
+$(OBJ)/main.o : src/main.c
+	$(CC) -I$(INC) -o $@ -c $^ $(LDFLAGS) $(CFLAGS)
+
+$(OBJ)/%.o: src/%.c
+	$(CC) -o $@ -c $^ -I$(INC) $(LDFLAGS) $(CFLAGS)
+
+$(OBJ)/%.o: $(LIB)%.c
+	$(CC) -o $@ -c $^ -I$(INC) $(LDFLAGS) $(CFLAGS)
 
 .PHONY : clean
 
 clean:
-	rm -rf *.o
-	rm -rf $(TESTS)
+	rm -rf $(OBJ)/*.o

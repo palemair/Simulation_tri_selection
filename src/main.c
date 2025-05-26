@@ -1,8 +1,8 @@
 #include <SDL2/SDL.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "../include/sort.h"
-#include "../include/colors.h"
+#include "sort.h"
+#include "colors.h"
 
 /* parametres init */
 static unsigned int Width_height = 650;
