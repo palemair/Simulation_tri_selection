@@ -10,7 +10,8 @@ static unsigned int Nbelem = 15;
 
 int main (int argc, char** argv)
 {
-static const char* wtitre = "Simulation tri selection";
+    static const char* wtitre = "Simulation tri selection";
+
     switch (argc)
     {
     case 2:
@@ -61,11 +62,12 @@ static const char* wtitre = "Simulation tri selection";
         SDL_Quit ();
         return EXIT_FAILURE;
     }
-    SDL_SetWindowTitle(window,wtitre);
+    SDL_SetWindowTitle (window, wtitre);
 
     SDL_Texture* textred =
         SDL_CreateTexture (renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,
                            50, 50);
+
     if (NULL == textred)
     {
         fprintf (stderr, "Erreur SDL_CreateTexture : %s", SDL_GetError ());
@@ -80,6 +82,7 @@ static const char* wtitre = "Simulation tri selection";
     SDL_Texture* textNavy =
         SDL_CreateTexture (renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,
                            50, 50);
+
     if (NULL == textNavy)
     {
         fprintf (stderr, "Erreur SDL_CreateTexture : %s", SDL_GetError ());
@@ -215,9 +218,7 @@ static const char* wtitre = "Simulation tri selection";
     }
 
     statut = EXIT_SUCCESS;
-    goto Quit;
 
-  Quit:
     if (NULL != textNavy)
         SDL_DestroyTexture (textNavy);
     if (NULL != textred)
@@ -227,5 +228,6 @@ static const char* wtitre = "Simulation tri selection";
     if (NULL != window)
         SDL_DestroyWindow (window);
     SDL_Quit ();
+
     return statut;
 }
