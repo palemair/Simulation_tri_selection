@@ -10,6 +10,7 @@ static unsigned int Nbelem = 15;
 
 int main (int argc, char** argv)
 {
+static const char* wtitre = "Simulation tri selection";
     switch (argc)
     {
     case 2:
@@ -48,6 +49,7 @@ int main (int argc, char** argv)
         SDL_Quit ();
         return EXIT_FAILURE;
     }
+
     if (0 !=
         SDL_CreateWindowAndRenderer (Gr.w, Gr.h, SDL_WINDOW_SHOWN, &window, &renderer))
     {
@@ -59,6 +61,8 @@ int main (int argc, char** argv)
         SDL_Quit ();
         return EXIT_FAILURE;
     }
+    SDL_SetWindowTitle(window,wtitre);
+
     SDL_Texture* textred =
         SDL_CreateTexture (renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,
                            50, 50);
@@ -76,9 +80,11 @@ int main (int argc, char** argv)
     SDL_Texture* textNavy =
         SDL_CreateTexture (renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,
                            50, 50);
-    if (NULL == textred)
+    if (NULL == textNavy)
     {
         fprintf (stderr, "Erreur SDL_CreateTexture : %s", SDL_GetError ());
+        if (NULL != textred)
+            SDL_DestroyTexture (textred);
         if (NULL != renderer)
             SDL_DestroyRenderer (renderer);
         if (NULL != window)
@@ -158,7 +164,7 @@ int main (int argc, char** argv)
                     if (ev.key.keysym.sym == SDLK_ESCAPE)
                     {
                         continuer = SDL_FALSE;
-                        goto Quit;
+                        break;
                     }
                 }
 
@@ -175,6 +181,8 @@ int main (int argc, char** argv)
 
                 if (data[j] < data[indexmin]) indexmin = j;
             }
+
+            if (!continuer) break;
 
             for (int t = 0; t < 2; t++)
             {
@@ -197,6 +205,8 @@ int main (int argc, char** argv)
             SDL_RenderPresent (renderer);
             SDL_Delay (DLAY);
         }
+
+        if (!continuer) break;
 
         clear_renderer (renderer, &Silver);
         Draw (tbrec, data, i, renderer, &Navy, &Blue, ptrGr);
