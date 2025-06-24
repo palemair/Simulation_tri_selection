@@ -9,7 +9,7 @@ INC= include/
 
 all: $(EXEC)
 
-selection : $(OBJ)/main.o $(OBJ)/sort.o $(OBJ)/colors.o
+selection : $(OBJ)/main.o $(OBJ)/sort.o $(OBJ)/colors.o $(OBJ)/tpile.o
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 $(OBJ)/main.o : src/main.c

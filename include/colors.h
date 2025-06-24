@@ -31,7 +31,12 @@ extern   SDL_Color Navy ;
 extern   SDL_Color Fuchsia ;
 extern   SDL_Color Purple ;
 /* prototypes */
-void init_graph(struct Graph *gr);
+int init_graph (SDL_Window **pwin, SDL_Renderer **prend,struct Graph *gr,const char *titre);
+void destroy_graph(SDL_Window **pwin, SDL_Renderer **prend);
+
+int init_texture(SDL_Texture **ptext, SDL_Renderer *prend, unsigned int x, unsigned int y);
+void destroy_texture(SDL_Texture *ptext);
+
 int chg_color(SDL_Renderer *rend, const SDL_Color *col);
 int clear_renderer(SDL_Renderer *rend, const SDL_Color *col);
 void Draw (SDL_Rect* t, int* tbint, size_t step,

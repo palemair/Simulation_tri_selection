@@ -1,102 +1,79 @@
+#define _GNU_SOURCE
 #include <SDL2/SDL.h>
+/* #include <SDL2/SDL_ttf.h> */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include "sort.h"
 #include "colors.h"
+#include "../include/tpile.h"
 
 /* parametres init */
-static unsigned int Width_height = 650;
-static unsigned int Nbelem = 15;
+static const char* wtitre = "Simulation tri selection";
 
+static char help[] = "Simulation du tri par selection\n"
+                     "option n pour le nombre d'éléments à trier\n"
+                     "option s pour la taille de la fenêtre\n";
+                 
 int main (int argc, char** argv)
 {
-    static const char* wtitre = "Simulation tri selection";
+    static int Nbelem = 15;
+    static int Width_height = 650;
+    int c;
 
-    switch (argc)
-    {
-    case 2:
-        {
-            sscanf (argv[1], "%u", &Width_height);
-            break;
-        }
+    opterr = 0;
 
-    case 3:
+    while ((c = getopt (argc, argv, "hn:s:")) != -1)
+        switch (c)
         {
-            sscanf (argv[1], "%u", &Width_height);
-            sscanf (argv[2], "%u", &Nbelem);
+        case 'n':
+            Nbelem = atoi (optarg);
             break;
-        }
-
-    default:
-        {
+        case 's':
+            Width_height = atoi (optarg);
             break;
+        case 'h':
+            fprintf (stderr, "%s",help);
+            return EXIT_FAILURE;
+            break;
+        case '?':
+            if (optopt == 'n')
+                fprintf (stderr, "Option -%c requires an argument.\n", optopt);
+            else if (isprint (optopt))
+                fprintf (stderr, "Unknown option `-%c'.\n", optopt);
+            else
+                fprintf (stderr, "Unknown option character `\\x%x'.\n", optopt);
+            return 1;
+        default:
+            abort ();
         }
-    }
 
     unsigned int DLAY = 200;
+    int statut = EXIT_FAILURE;
+    SDL_bool continuer = SDL_TRUE;
+
     SDL_Window* window;
     SDL_Renderer* renderer;
-    SDL_bool continuer = SDL_TRUE;
-    int statut = EXIT_FAILURE;
-
     struct Graph Gr = {.w = Width_height,.h = Width_height,.nb = Nbelem };
     struct Graph* ptrGr = &Gr;
 
-    init_graph (ptrGr);
+    init_graph (&window,&renderer,ptrGr,wtitre);
+    init_pile();
 
-    if (0 != SDL_Init (SDL_INIT_VIDEO))
-    {
-        fprintf (stderr, "Erreur SDL_Init : %s", SDL_GetError ());
-        SDL_Quit ();
-        return EXIT_FAILURE;
-    }
+    SDL_Texture *textRed = NULL;
+    SDL_Texture *textNavy = NULL;
+    
+    if(init_texture(&textRed,renderer,10,10))
+            perror("init_texture fails");
 
-    if (0 !=
-        SDL_CreateWindowAndRenderer (Gr.w, Gr.h, SDL_WINDOW_SHOWN, &window, &renderer))
-    {
-        fprintf (stderr, "Erreur SDL_CreateWindowAndRenderer : %s", SDL_GetError ());
-        if (NULL != renderer)
-            SDL_DestroyRenderer (renderer);
-        if (NULL != window)
-            SDL_DestroyWindow (window);
-        SDL_Quit ();
-        return EXIT_FAILURE;
-    }
-    SDL_SetWindowTitle (window, wtitre);
+    if(init_texture(&textNavy,renderer,10,10))
+            perror("init_texture fails");
 
-    SDL_Texture* textred =
-        SDL_CreateTexture (renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,
-                           50, 50);
+    empiler(textRed);
 
-    if (NULL == textred)
-    {
-        fprintf (stderr, "Erreur SDL_CreateTexture : %s", SDL_GetError ());
-        if (NULL != renderer)
-            SDL_DestroyRenderer (renderer);
-        if (NULL != window)
-            SDL_DestroyWindow (window);
-        SDL_Quit ();
-        return EXIT_FAILURE;
-    }
-
-    SDL_Texture* textNavy =
-        SDL_CreateTexture (renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,
-                           50, 50);
-
-    if (NULL == textNavy)
-    {
-        fprintf (stderr, "Erreur SDL_CreateTexture : %s", SDL_GetError ());
-        if (NULL != textred)
-            SDL_DestroyTexture (textred);
-        if (NULL != renderer)
-            SDL_DestroyRenderer (renderer);
-        if (NULL != window)
-            SDL_DestroyWindow (window);
-        SDL_Quit ();
-        return EXIT_FAILURE;
-    }
-
-    SDL_SetRenderTarget (renderer, textred);
+    empiler(textNavy);
+    
+    SDL_SetRenderTarget (renderer, textRed);
     clear_renderer (renderer, &Red);
     SDL_SetRenderTarget (renderer, NULL);
 
@@ -104,24 +81,31 @@ int main (int argc, char** argv)
     clear_renderer (renderer, &Navy);
     SDL_SetRenderTarget (renderer, NULL);
 
-    SDL_Event ev;
+    /* if(TTF_Init() == -1){ */
+	/* fprintf(stderr, "Erreur d'initialisation de TTF_Init : %s\n", TTF_GetError()); */
+	/* exit(EXIT_FAILURE); */
+    /* } */
+
+    /* TTF_Font* police = NULL; */
+
 
     int data[ptrGr->nb];
 
     for (int i = 0; i < ptrGr->nb; i++)
     {
-        data[i] = (3 * i + 8) % (ptrGr->h / 10);
+        data[i] = (3 * i + 5) % (ptrGr->h / 10);
     }
 
     SDL_Rect tbrec[ptrGr->nb];
 
+    SDL_Event ev;
     while (continuer)
     {
         shuffle_fy (data, sizeof data / sizeof data[0], sizeof data[0]);
         clear_renderer (renderer, &Silver);
         Draw (tbrec, data, 0, renderer, &Navy, &Navy, ptrGr);
         SDL_RenderPresent (renderer);
-        SDL_Delay ((2 * DLAY));
+        SDL_Delay ((DLAY));
 
         int indexmin, j, i;
 
@@ -129,15 +113,7 @@ int main (int argc, char** argv)
         {
             indexmin = i;
 
-            SDL_RenderCopy (renderer, textred, NULL, &tbrec[i]);
-            SDL_RenderPresent (renderer);
-            SDL_Delay (DLAY);
-
-            SDL_RenderCopy (renderer, textNavy, NULL, &tbrec[i]);
-            SDL_RenderPresent (renderer);
-            SDL_Delay (DLAY);
-
-            SDL_RenderCopy (renderer, textred, NULL, &tbrec[i]);
+            SDL_RenderCopy (renderer, textRed, NULL, &tbrec[i]);
             SDL_RenderPresent (renderer);
             SDL_Delay (DLAY);
 
@@ -161,7 +137,7 @@ int main (int argc, char** argv)
                     }
                     if (ev.key.keysym.sym == SDLK_RETURN)
                     {
-                        if (DLAY > 100) DLAY -= 100;
+                        if (DLAY > 200) DLAY -= 100;
                         break;
                     }
                     if (ev.key.keysym.sym == SDLK_ESCAPE)
@@ -174,7 +150,7 @@ int main (int argc, char** argv)
                 if (!continuer) break;
 
 
-                SDL_RenderCopy (renderer, textred, NULL, &tbrec[j]);
+                SDL_RenderCopy (renderer, textRed, NULL, &tbrec[j]);
                 SDL_RenderPresent (renderer);
                 SDL_Delay ((DLAY / 5));
 
@@ -189,7 +165,7 @@ int main (int argc, char** argv)
 
             for (int t = 0; t < 2; t++)
             {
-                SDL_RenderCopy (renderer, textred, NULL, &tbrec[indexmin]);
+                SDL_RenderCopy (renderer, textRed, NULL, &tbrec[indexmin]);
                 SDL_RenderPresent (renderer);
                 SDL_Delay (DLAY);
 
@@ -219,15 +195,9 @@ int main (int argc, char** argv)
 
     statut = EXIT_SUCCESS;
 
-    if (NULL != textNavy)
-        SDL_DestroyTexture (textNavy);
-    if (NULL != textred)
-        SDL_DestroyTexture (textred);
-    if (NULL != renderer)
-        SDL_DestroyRenderer (renderer);
-    if (NULL != window)
-        SDL_DestroyWindow (window);
-    SDL_Quit ();
+    while(!pile_empty()) SDL_DestroyTexture (depiler());
+
+    destroy_graph(&window,&renderer);
 
     return statut;
 }
