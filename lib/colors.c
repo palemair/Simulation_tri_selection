@@ -110,11 +110,11 @@ void Draw (SDL_Rect* t, int* tbint, size_t step,
         t[i].w = pGr->dw;
         t[i].h = (10 * tbint[i]);
     }
-    chg_color (rend, col2);
+    chg_color (rend, col1);
 
     for (size_t s = 0; s <= step; s++) SDL_RenderFillRect (rend, &t[s]);
 
-    chg_color (rend, col1);
+    chg_color (rend, col2);
 
     for (size_t u = step + 1; u < L; u++) SDL_RenderFillRect (rend, &t[u]);
 }
