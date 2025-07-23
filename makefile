@@ -1,27 +1,32 @@
 CC=gcc
 CFLAGS=-g -Wall -Wextra -pedantic -std=c11 -fno-common -fno-builtin
-LDFLAGS = -lSDL2
+LDFLAGS = -lSDL2 -lSDL2_ttf
 EXEC= selection
-TESTS= test
-OBJ= obj
-LIB= lib/
+TESTS= tests/
+OBJ= obj/
+SRC= src/
 INC= include/
 
 all: $(EXEC)
 
-selection : $(OBJ)/main.o $(OBJ)/sort.o $(OBJ)/colors.o $(OBJ)/tpile.o
+selection : $(OBJ)main.o $(OBJ)colors.o $(OBJ)tstack.o $(OBJ)xalloc.o $(OBJ)drawing.o $(OBJ)init_0.o
+
 	$(CC) -o $@ $^ $(LDFLAGS)
 
-$(OBJ)/main.o : src/main.c
+graph_test : $(TESTS)graphics.o $(OBJ)colors.o $(OBJ)tstack.o $(OBJ)xalloc.o $(OBJ)drawing.o $(OBJ)init_0.o 
+
+	$(CC) -o $@ $^ $(LDFLAGS)
+
+$(OBJ)main.o : main.c
 	$(CC) -I$(INC) -o $@ -c $^ $(LDFLAGS) $(CFLAGS)
 
-$(OBJ)/%.o: src/%.c
+$(OBJ)%.o: $(SRC)%.c
 	$(CC) -o $@ -c $^ -I$(INC) $(LDFLAGS) $(CFLAGS)
 
-$(OBJ)/%.o: $(LIB)%.c
+$(TESTS)graphics.o: $(TESTS)graphics.c
 	$(CC) -o $@ -c $^ -I$(INC) $(LDFLAGS) $(CFLAGS)
 
 .PHONY : clean
 
 clean:
-	rm -rf $(OBJ)/*.o
+	rm -rf $(OBJ)*.o
