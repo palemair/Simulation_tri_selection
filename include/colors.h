@@ -2,47 +2,19 @@
 #ifndef _COLORS
 #define _COLORS
 
-#include<stdlib.h>
 #include <SDL2/SDL.h>
 
-struct Graph {
-    unsigned short w;
-    unsigned short h;
-    unsigned char nb;
-    unsigned char dw;
-    unsigned char marge;
-    unsigned char padding;
-};
-    
-extern   SDL_Color White;
-extern   SDL_Color Silver; 
-extern   SDL_Color Gray ;
-extern   SDL_Color Black ;
-extern   SDL_Color Red ;
-extern   SDL_Color Maroon ;
-extern   SDL_Color Yellow ;
-extern   SDL_Color Olive ;
-extern   SDL_Color Lime ;
-extern   SDL_Color Green ;
-extern   SDL_Color Aqua ;
-extern   SDL_Color Teal ;
-extern   SDL_Color Blue ;
-extern   SDL_Color Navy ;
-extern   SDL_Color Fuchsia ;
-extern   SDL_Color Purple ;
+typedef struct color_pair {
+    char name [21];
+    uint8_t r,g,b;
+} color_p;
+
 /* prototypes */
-int init_graph (SDL_Window **pwin, SDL_Renderer **prend,struct Graph *gr,const char *titre);
-void destroy_graph(SDL_Window **pwin, SDL_Renderer **prend);
-
-int init_texture(SDL_Texture **ptext, SDL_Renderer *prend, unsigned int x, unsigned int y);
-void destroy_texture(SDL_Texture *ptext);
-
-int chg_color(SDL_Renderer *rend, const SDL_Color *col);
+void init_color_html(void);
+int active_color(SDL_Renderer *rend, const SDL_Color *col, const int alpha);
 int clear_renderer(SDL_Renderer *rend, const SDL_Color *col);
-void Draw (SDL_Rect* t, int* tbint, size_t step,
-           SDL_Renderer* rend,
-           const SDL_Color* col1,
-           const SDL_Color* col2,
-           struct Graph *pGr);
+
+void update_colors(color_p *tb);
+int set_SDL_Color(SDL_Color *const col, const char *str);
 
 #endif
